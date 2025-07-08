@@ -3,6 +3,7 @@ from aiogram.types import WebAppInfo, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.utils import executor
 import json
 import logging
+from aiohttp import web
 
 API_TOKEN = "7573925049:AAE8rY1dNCO9anir_lJ7XN56e228jDqXsbc"
 OWNER_ID = 454453304
@@ -43,5 +44,21 @@ async def webapp_data_handler(message: types.Message):
     await bot.send_message(chat_id=OWNER_ID, text=text, parse_mode="HTML")
     await message.answer("✅ Заявка отправлена! Спасибо!")
 
+# HTTP-сервер для Render
+async def handle(request):
+    return web.Response(text="Bot is running!")
+
+def run_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle)
+    return app
+
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    import asyncio
+    from threading import Thread
+
+    def start_bot():
+        executor.start_polling(dp, skip_updates=True)
+
+    Thread(target=start_bot).start()
+    web.run_app(run_web_server(), port=10000)
